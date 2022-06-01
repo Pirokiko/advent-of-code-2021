@@ -1,7 +1,8 @@
-use crate::puzzle8::number_segments::Number::{
+use crate::puzzle8_2::number_segments::Number::{
     EIGHT, FIVE, FOUR, NINE, ONE, SEVEN, SIX, THREE, TWO, ZERO,
 };
 use std::collections::HashMap;
+use std::slice::Iter;
 
 /*
   0:      1:      2:      3:      4:
@@ -100,78 +101,7 @@ impl Number {
     }
 }
 
-struct Setup {
-    a: String,
-    b: String,
-    c: String,
-    d: String,
-    e: String,
-    f: String,
-    g: String,
-}
-
-impl Setup {
-    fn patterns(&self) -> Vec<Pattern> {
-        let mut patterns: Vec<Pattern> = vec![];
-        let mut chars: Vec<char> = vec![];
-        for a in self.a.chars() {
-            chars.push(a);
-            for b in self.b.chars() {
-                if chars.contains(&b) {
-                    continue;
-                }
-                chars.push(b);
-                for c in self.c.chars() {
-                    if chars.contains(&c) {
-                        continue;
-                    }
-                    chars.push(c);
-                    for d in self.d.chars() {
-                        if chars.contains(&d) {
-                            continue;
-                        }
-                        chars.push(d);
-                        for e in self.e.chars() {
-                            if chars.contains(&e) {
-                                continue;
-                            }
-                            chars.push(e);
-                            for f in self.f.chars() {
-                                if chars.contains(&f) {
-                                    continue;
-                                }
-                                chars.push(f);
-                                for g in self.g.chars() {
-                                    if chars.contains(&g) {
-                                        continue;
-                                    }
-                                    patterns.push(Pattern {
-                                        a,
-                                        b,
-                                        c,
-                                        d,
-                                        e,
-                                        f,
-                                        g,
-                                    })
-                                }
-                                chars.pop();
-                            }
-                            chars.pop();
-                        }
-                        chars.pop();
-                    }
-                    chars.pop();
-                }
-                chars.pop();
-            }
-            chars.pop();
-        }
-
-        patterns
-    }
-}
-
+#[derive(Debug)]
 struct Pattern {
     a: char,
     b: char,
@@ -184,16 +114,29 @@ struct Pattern {
 
 impl Pattern {
     fn resolve_char(&self, char: char) -> char {
-        match char {
-            'a' => self.a,
-            'b' => self.b,
-            'c' => self.c,
-            'd' => self.d,
-            'e' => self.e,
-            'f' => self.f,
-            'g' => self.g,
-            _ => panic!("Unresolvable char ({}) found", char),
+        if self.a == char {
+            return 'a';
         }
+        if self.b == char {
+            return 'b';
+        }
+        if self.c == char {
+            return 'c';
+        }
+        if self.d == char {
+            return 'd';
+        }
+        if self.e == char {
+            return 'e';
+        }
+        if self.f == char {
+            return 'f';
+        }
+        if self.g == char {
+            return 'g';
+        }
+
+        panic!("Unresolvable char ({}) found", char)
     }
     fn resolve(&self, output: &str) -> String {
         output.chars().map(|char| self.resolve_char(char)).collect()
@@ -266,10 +209,30 @@ impl Line {
     }
 }
 
+fn get_filtered_patterns<F>(patterns: Vec<&String>, filters: Vec<F>) -> Vec<&String>
+where
+    F: Fn(&String) -> bool,
+{
+    patterns
+        .into_iter()
+        .filter(|item| filters.iter().all(|filter| filter(item)))
+        .collect()
+}
+
+fn get_patterns_filtered<P>(line: &Line, filter: P) -> Vec<&String>
+where
+    P: FnMut(&&String) -> bool,
+{
+    line.patterns.iter().filter(filter).collect()
+}
+
+fn get_patterns_with_length(line: &Line, len: usize) -> Vec<&String> {
+    get_patterns_filtered(line, |pattern| pattern.len() == len)
+}
+
 fn get_pattern_for(line: &Line, nr: Number) -> &str {
-    line.patterns
+    get_patterns_with_length(line, nr.pattern().len())
         .iter()
-        .filter(|pattern| pattern.len() == nr.pattern().len())
         .next()
         .expect(&format!(
             "A pattern for the number {} should exist",
@@ -277,76 +240,137 @@ fn get_pattern_for(line: &Line, nr: Number) -> &str {
         ))
 }
 
-fn setup_from_line(line: &Line) -> Setup {
-    let one_pattern = get_pattern_for(line, ONE);
-    let four_pattern = get_pattern_for(line, FOUR);
-    let seven_pattern = get_pattern_for(line, SEVEN);
-    let eight_pattern = get_pattern_for(line, EIGHT);
-
+fn get_a(one_pattern: &str, seven_pattern: &str) -> char {
     let a: String = seven_pattern
         .chars()
         .filter(|char| !one_pattern.contains(*char))
         .collect();
-    assert!(a.len() == 1);
-
-    // let eg: String = eight_pattern
-    //     .chars()
-    //     .filter(|char| !four_pattern.contains(*char))
-    //     .filter(|char| !a.contains(*char))
-    //     .collect();
-
-    let others: String = "abcdefg"
-        .chars()
-        .filter(|char| !one_pattern.contains(*char))
-        // .filter(|char| !eg.contains(*char))
-        .filter(|char| !a.contains(*char))
-        .collect();
-
-    Setup {
-        a,
-        b: others.clone(),
-        c: String::from(one_pattern),
-        d: others.clone(),
-        e: others.clone(),
-        f: String::from(one_pattern),
-        g: others.clone(),
-    }
-    //
-    // let all: String = String::from("abcdefg");
-    //
-    // Setup {
-    //     a: all.clone(),
-    //     b: all.clone(),
-    //     c: all.clone(),
-    //     d: all.clone(),
-    //     e: all.clone(),
-    //     f: all.clone(),
-    //     g: all.clone(),
-    // }
+    assert_eq!(a.len(), 1);
+    a.chars().next().expect("should exist")
 }
 
-fn extract_pattern(line: &Line, setup: &Setup) -> Result<usize, String> {
-    for pattern in setup.patterns() {
-        if let Ok(value) = line.resolve(pattern) {
-            return Ok(value);
+fn count_chars(patterns: &Vec<String>) -> HashMap<char, usize> {
+    let mut count = HashMap::new();
+
+    for p in patterns {
+        for p_char in p.chars() {
+            count.entry(p_char).and_modify(|c| *c += 1).or_insert(1);
         }
     }
-    Err(String::from("No matches found"))
+    count
+}
+
+fn remove_string_chars(pattern: &String, chars: &Vec<char>) -> String {
+    pattern.chars().filter(|c| !chars.contains(c)).collect()
+}
+
+fn remove_chars(patterns: Iter<&String>, chars: &Vec<char>) -> Vec<String> {
+    patterns.map(|p| remove_string_chars(p, chars)).collect()
+}
+
+fn char_in(char_options: &Vec<char>, pattern: &str) -> char {
+    *char_options
+        .iter()
+        .find(|c| pattern.contains(**c))
+        .expect("To exist")
+}
+
+fn get_c_d_e(a: char, line: &Line) -> (char, char, char) {
+    let one_pattern: &str = get_pattern_for(line, ONE);
+    let four_pattern: &str = get_pattern_for(line, FOUR);
+    let patterns_of_length_six = remove_chars(get_patterns_with_length(line, 6).iter(), &vec![a]);
+    assert_eq!(patterns_of_length_six.len(), 3);
+
+    let count = count_chars(&patterns_of_length_six);
+
+    // c, d & e
+    let double_occurences = count
+        .into_iter()
+        .filter(|(_, cnt)| *cnt == 2)
+        .map(|(char, _)| char)
+        .collect::<Vec<char>>();
+    assert_eq!(double_occurences.len(), 3);
+
+    let c = char_in(&double_occurences, one_pattern);
+    let d_and_e = double_occurences
+        .into_iter()
+        .filter(|char| *char != c)
+        .collect::<Vec<char>>();
+
+    let d = char_in(&d_and_e, four_pattern);
+
+    let e = d_and_e
+        .into_iter()
+        .filter(|char| *char != d)
+        .next()
+        .expect("to expect");
+
+    (c, d, e)
+}
+
+fn get_f(c: char, one_pattern: &str) -> char {
+    let f: String = one_pattern.chars().filter(|char| *char != c).collect();
+    assert_eq!(f.len(), 1);
+    f.chars().next().expect("should exist")
+}
+
+fn get_b_and_g(a: char, c: char, d: char, e: char, f: char, line: &Line) -> (char, char) {
+    let mut known_chars = vec![a, c, d, e, f];
+    let pattern_for_four = String::from(get_pattern_for(line, FOUR));
+
+    let last_char_for_four = remove_string_chars(&pattern_for_four, &known_chars);
+    println!("{}", last_char_for_four);
+    assert_eq!(last_char_for_four.len(), 1);
+    let b = last_char_for_four.chars().next().expect("to exist");
+
+    known_chars.push(b);
+
+    let pattern_for_eight = String::from(get_pattern_for(line, EIGHT));
+    let last_char_for_eight = remove_string_chars(&pattern_for_eight, &known_chars);
+    assert_eq!(last_char_for_eight.len(), 1);
+    let g = last_char_for_eight.chars().next().expect("to exist");
+    (b, g)
+}
+
+fn setup_from_line(line: &Line) -> Pattern {
+    let one_pattern = get_pattern_for(line, ONE);
+    let seven_pattern = get_pattern_for(line, SEVEN);
+
+    let patterns_of_length_five = get_patterns_with_length(line, 5);
+    assert_eq!(patterns_of_length_five.len(), 3);
+    let patterns_of_length_six = get_patterns_with_length(line, 6);
+    assert_eq!(patterns_of_length_six.len(), 3);
+
+    let a = get_a(one_pattern, seven_pattern);
+    let (c, d, e) = get_c_d_e(a, line);
+    let f = get_f(c, one_pattern);
+    let (b, g) = get_b_and_g(a, c, d, e, f, line);
+
+    Pattern {
+        a,
+        b,
+        c,
+        d,
+        e,
+        f,
+        g,
+    }
 }
 
 pub fn determine_number(line_str: &str) -> usize {
     let line = Line::from(line_str);
     let setup = setup_from_line(&line);
-    extract_pattern(&line, &setup).expect("Value to be possible")
+    println!("{:?}", setup);
+    line.resolve(setup).expect("Value to be possible")
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::puzzle8::number_segments::determine_number;
+    use crate::puzzle8_2::number_segments::determine_number;
 
     #[test]
     fn determine_number_works() {
-        // assert_eq!(5353,determine_number("acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf"));
+        assert_eq!(5353,determine_number("acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf"));
 
         assert_eq!(8394,determine_number("be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe"));
         assert_eq!(9781,determine_number("edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec | fcgedb cgb dgebacf gc"));

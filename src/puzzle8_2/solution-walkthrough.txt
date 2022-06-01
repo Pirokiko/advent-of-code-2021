@@ -1,0 +1,108 @@
+assert_eq!(5353,determine_number("acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf"));
+
+This will represent abcdefg as the input of the question and use ABCDEFG as the representation for the RESULTS
+
+Patterns:
+acedgfb
+cdfbe
+gcdfa
+fbcad
+dab
+cefabd
+cdfgeb
+eafb
+cagedb
+ab
+
+Unique number patterns:
+1, 4, 7, 8
+
+1 = ab
+4 = eafb
+7 = dab
+8 = acedgfb
+
+A = letters for 7 - letters for 1
+A = d
+Now remove A from all patterns as we know what A is already
+
+acegfb  + A=d
+cfbe    + A=d
+gcfa    + A=d
+fbca    + A=d
+ab      + A=d
+cefab   + A=d
+cfgeb   + A=d
+eafb
+cageb   + A=d
+ab
+
+
+Set of patterns with length of 6
+cefab   + A=d                   0: 5    => BCEFG    + A
+cfgeb   + A=d                   6: 5    => BDEFG    + A
+cageb   + A=d                   9: 5    => BCDFG    + A
+
+C, D & E (a, f & g) are the chars which occur in 2 patterns
+With the C, D & E chars as options,
+C = char which is present in the pattern for 1 (CF = ab)
+C = a
+D & E (f & g) = chars which are NOT present in the pattern for 1 (CF = ab)
+    D = char which is present in pattern for 4 (BCDF = eafb)
+    D = f
+    E = char which is NOT present in pattern for 4 (BCDF = eafb)
+    E = g
+F = other char of the pattern for 1 (CF = ab) which is not C char
+F = b
+
+
+Remove all known chars
+
+ce   + A=d C=a D=f E=g F=b
+ce   + A=d D=f F=b
+c    + A=d C=a D=f E=g
+c    + A=d C=a D=f F=b
+     + A=d C=a F=b
+c    + A=d C=a D=f E=g F=b
+ce   + A=d D=f E=g F=b
+e    + C=a D=f F=b
+ce   + A=d C=a E=g F=b
+     + C=a F=b
+
+The pattern of 4 (BCDF = eafb) only has a single character unsolved: B
+B = e
+
+
+Remove all known chars
+
+c   + A=d C=a D=f E=g F=b B=e
+c   + A=d D=f F=b B=e
+c    + A=d C=a D=f E=g
+c    + A=d C=a D=f F=b
+     + A=d C=a F=b
+c    + A=d C=a D=f E=g F=b
+c   + A=d D=f E=g F=b B=e
+    + C=a D=f F=b B=e
+c   + A=d C=a E=g F=b B=e
+     + C=a F=b
+
+Last char is pattern for 8 (ABCDEFG = acedgfb) filtered by known values all but G
+G = c
+
+
+====== RESULTING TRANSLATION TABLE ======
+A = d
+B = e
+C = a
+D = f
+E = g
+F = b
+G = c
+
+====== RESULT =====
+
+cdfeb fcadb cdfeb cdbaf
+GADBF DGCAF GADBF GAFCD
+ABDFG ACDFG ABDFG ACDFG
+5     3     5     3
+5353

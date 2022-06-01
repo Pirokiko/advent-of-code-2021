@@ -1,0 +1,105 @@
+/*
+  0:      1:      2:      3:      4:
+ aaaa    ....    aaaa    aaaa    ....
+b    c  .    c  .    c  .    c  b    c
+b    c  .    c  .    c  .    c  b    c
+ ....    ....    dddd    dddd    dddd
+e    f  .    f  e    .  .    f  .    f
+e    f  .    f  e    .  .    f  .    f
+ gggg    ....    gggg    gggg    ....
+
+  5:      6:      7:      8:      9:
+ aaaa    aaaa    aaaa    aaaa    aaaa
+b    .  b    .  .    c  b    c  b    c
+b    .  b    .  .    c  b    c  b    c
+ dddd    dddd    ....    dddd    dddd
+.    f  e    f  .    f  e    f  .    f
+.    f  e    f  .    f  e    f  .    f
+ gggg    gggg    ....    gggg    gggg
+ */
+
+
+ Unique number patterns:
+ 1 = cf
+ 4 = bcdf
+ 7 = acf
+ 8 = abcdefg
+
+
+ a = letters for 7 - letters for 1
+ Now remove a from all numbers as we now which a is already
+
+ c & f = letters for 1, but which is which? All unique length number patterns contain both
+
+ b & d = letters for 4 - letters for 1, leaves 2 options but which is which?
+
+ eg = all letters - letters a,b,c,d,f; leaving 2 options, which is which?
+
+Numbers with length 5 => 2,3,5
+Numbers with length 6 => 0,6,9
+
+
+Number with pattern length:
+0: 6    => abcefg
+1: 2    => cf
+2: 5    => acdeg
+3: 5    => acdfg
+4: 4    => bcdf
+5: 5    => abdfg
+6: 6    => abdefg
+7: 3    => acf
+8: 7    => abcdefg
+9: 6    => abcdfg
+
+a = pattern of 7 minus pattern of 1
+remove from options
+
+0: 5    => bcefg    + a
+1: 2    => cf       +
+2: 4    => cdeg     + a
+3: 4    => cdfg     + a
+4: 4    => bcdf     +
+5: 4    => bdfg     + a
+6: 5    => bdefg    + a
+7: 2    => cf       + a
+8: 6    => bcdefg   + a
+9: 5    => bcdfg    + a
+
+Set of patterns with length of 6
+0: 5    => bcefg    + a
+6: 5    => bdefg    + a
+9: 5    => bcdfg    + a
+
+c, d & e are the chars which occur in 2 patterns
+With the c, d & e chars as options,
+c = char which is present in the pattern for 1
+d & e = chars which are NOT present in the pattern for 1
+    d = char which is present inn pattern for 4
+    e = char which is NOT present inn pattern for 4
+f = other char of the pattern for 1 which is not c char
+
+Remove all options
+
+0: 2    => bg    + acef
+1: 0    =>       + cf
+2: 2    => g     + acde
+3: 2    => g     + acdf
+4: 2    => b     + cdf
+5: 3    => bg    + adf
+6: 3    => bg    + adef
+7: 0    =>       + acf
+8: 3    => bg    + acdef
+9: 3    => bg    + acdf
+
+Set of patterns with length of 2 left
+0: 2    => bg     + acef
+2: 2    => dg     + ace
+3: 2    => dg     + acf
+4: 2    => bd     + cf
+
+Only the pattern for 4 is known, so lets use it
+There are 2 chars left in the pattern for 4: bd
+In the other patterns of the set (excluding the pattern for 4), the char b is present only once, while the char d is present twice
+b = char present once in the other patterns in the set
+d = other char in the pattern for 4
+g = other char is left
