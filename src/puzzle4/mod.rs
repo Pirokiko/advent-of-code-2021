@@ -14,7 +14,7 @@ struct Board {
 }
 
 impl Display for Board {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, _: &mut Formatter<'_>) -> std::fmt::Result {
         for row in self.rows() {
             println!(
                 "{:?}",
@@ -68,7 +68,7 @@ impl Board {
     fn columns(&self) -> Vec<Vec<&Cell>> {
         let column_count = self.cells.len() / self.row_size;
         let mut columns = Vec::with_capacity(column_count);
-        for i in 0..column_count {
+        for _ in 0..column_count {
             columns.push(vec![]);
         }
 

@@ -160,7 +160,7 @@ impl Line {
                 break;
             }
         }
-        if (nrs.len() != 4) {
+        if nrs.len() != 4 {
             return Err(String::from("Not all pattern char matched a Number"));
         }
         Ok(usize::from_str_radix(&nrs, 10).expect("to be a number"))

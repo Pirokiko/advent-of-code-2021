@@ -3,7 +3,6 @@ mod line;
 use line::Line;
 use line::Pos;
 use std::collections::HashMap;
-use std::fs;
 
 fn index_for_pos(pos: &Pos) -> i32 {
     pos.x * 10000 + pos.y

@@ -1,5 +1,3 @@
-use std::ops::Index;
-
 #[derive(Debug, PartialEq)]
 struct Position {
     original_value: isize,
