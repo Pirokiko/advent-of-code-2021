@@ -5,3 +5,5 @@ authors = ["Milan de Graaf <mmaster.milan@gmail.com>"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[dependencies]
+itertools = "0.10.3"

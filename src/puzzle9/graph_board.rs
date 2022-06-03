@@ -1,4 +1,5 @@
 use crate::puzzle9::graph::{Graph, NodeData, NodeIndex};
+use std::collections::VecDeque;
 
 pub struct GraphBoard {
     graph: Graph<usize>,
@@ -19,12 +20,62 @@ impl GraphBoard {
 
     fn is_low_point(&self, source: &NodeIndex) -> bool {
         let source_val = self.graph.get_node(*source).value();
-        println!("source_val: {}", source_val);
         self.graph.successors(*source).all(|index| {
             let index_value = self.graph.get_node(index).value();
-            println!("source_val: {}, index_value: {}", *source_val, *index_value);
             index_value.gt(source_val)
         })
+    }
+}
+
+impl GraphBoard {
+    pub fn basins(&self) -> Vec<Vec<NodeIndex>> {
+        self.graph
+            .nodes()
+            .filter(|index| self.is_low_point(index))
+            .map(|index| self.basin(&index).collect())
+            .collect()
+    }
+
+    fn basin(&self, low_point: &NodeIndex) -> Basin {
+        let mut proces = VecDeque::from(vec![]);
+        if self.is_low_point(low_point) {
+            proces.push_back(*low_point);
+        }
+        Basin {
+            graph: &self.graph,
+            indices: vec![],
+            proces,
+        }
+    }
+}
+
+struct Basin<'graph> {
+    graph: &'graph Graph<usize>,
+    proces: VecDeque<NodeIndex>,
+    indices: Vec<NodeIndex>,
+}
+
+impl<'graph> Iterator for Basin<'graph> {
+    type Item = NodeIndex;
+
+    fn next(&mut self) -> Option<NodeIndex> {
+        match self.proces.pop_front() {
+            None => None,
+            Some(index) => {
+                self.indices.push(index);
+
+                let successors: Vec<NodeIndex> = self
+                    .graph
+                    .successors(index)
+                    .filter(|idx| *self.graph.get_node(*idx).value() != 9)
+                    .filter(|idx| !self.indices.contains(idx))
+                    .collect();
+                for successor in successors {
+                    self.proces.push_back(successor);
+                }
+                Some(index)
+            }
+        }
     }
 }
 
