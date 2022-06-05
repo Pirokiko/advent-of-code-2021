@@ -16,6 +16,9 @@ impl<Val> NodeData<Val> {
     pub fn value(&self) -> &Val {
         &self.value
     }
+    pub fn value_mut(&mut self) -> &mut Val {
+        &mut self.value
+    }
 }
 
 pub type EdgeIndex = usize;
@@ -38,6 +41,10 @@ impl<Val> Graph<Val> {
 
     pub fn get_node(&self, index: NodeIndex) -> &NodeData<Val> {
         &self.nodes[index]
+    }
+
+    pub fn get_node_mut(&mut self, index: NodeIndex) -> &mut NodeData<Val> {
+        &mut self.nodes[index]
     }
 }
 

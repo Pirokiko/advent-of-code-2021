@@ -45,7 +45,7 @@ pub fn part1(content: &str) -> usize {
 pub fn part2(content: &str) -> usize {
     let mut board = parse(content);
 
-    let step = simulate(&mut board, |step_nr, all_flashed| !all_flashed);
+    let step = simulate(&mut board, |_, all_flashed| !all_flashed);
 
     println!("Answer part 2: {}", step);
     step

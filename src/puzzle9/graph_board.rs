@@ -1,4 +1,4 @@
-use crate::puzzle9::graph::{Graph, NodeData, NodeIndex};
+use crate::lib::graph::{Graph, NodeData, NodeIndex};
 use std::collections::VecDeque;
 
 pub struct GraphBoard {

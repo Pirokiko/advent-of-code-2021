@@ -1,6 +1,5 @@
 use itertools::Itertools;
 
-mod graph;
 mod graph_board;
 
 pub fn part1(content: &str) -> usize {
@@ -15,7 +14,7 @@ pub fn part1(content: &str) -> usize {
 
 pub fn part2(content: &str) -> usize {
     let board = graph_board::parse(content);
-    let mut basins: Vec<Vec<usize>> = board.basins();
+    let basins: Vec<Vec<usize>> = board.basins();
 
     // When 2 low_points are in the same basin, indices appear twice in one basin and the basin is duplicated
     // using .sort() and .unique() to de-duplicate
