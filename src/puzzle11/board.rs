@@ -1,3 +1,4 @@
+use itertools::all;
 use std::ops::RangeInclusive;
 
 pub struct Cell {
@@ -22,11 +23,13 @@ impl Cell {
     fn flash(&mut self) {
         self.has_flashed = true;
     }
-    fn reset(&mut self) {
+    fn reset(&mut self) -> bool {
         if self.has_flashed {
             self.has_flashed = false;
             self.value = 0;
+            return true;
         }
+        false
     }
 }
 
@@ -44,6 +47,10 @@ impl Board {
                 .map(|row| row.iter().map(|val| Cell::from(*val)).collect())
                 .collect(),
         }
+    }
+
+    pub fn all_flashed(&self) -> bool {
+        false
     }
 
     pub fn flash_count(&self) -> usize {
@@ -70,12 +77,14 @@ impl Board {
         }
     }
 
-    pub fn reset_flashed(&mut self) {
+    pub fn reset_flashed(&mut self) -> bool {
+        let mut all_flashed = true;
         for x in 0..self.data.len() {
             for y in 0..self.data[x].len() {
-                self.get_mut(x, y).reset()
+                all_flashed = self.get_mut(x, y).reset() && all_flashed;
             }
         }
+        all_flashed
     }
 
     fn flash(&mut self, x: usize, y: usize) {
