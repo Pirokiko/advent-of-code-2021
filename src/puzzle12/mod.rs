@@ -100,8 +100,8 @@ mod tests {
 
     #[test]
     fn part2_works() {
-        assert_eq!(36, part2(TEST_1));
-        assert_eq!(103, part2(TEST_2));
         assert_eq!(3509, part2(TEST_3));
+        assert_eq!(103, part2(TEST_2));
+        assert_eq!(36, part2(TEST_1));
     }
 }

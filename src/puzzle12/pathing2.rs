@@ -14,6 +14,7 @@ pub fn all_paths2(
     path2(
         graph,
         start,
+        start,
         end,
         &mut cave_visited_twice,
         &mut vec![],
@@ -26,6 +27,7 @@ pub fn all_paths2(
 fn path2<F>(
     graph: &mut Graph<Cavern>,
     node: NodeIndex,
+    start: NodeIndex,
     end: NodeIndex,
     mut cave_visited_twice: &mut Option<NodeIndex>,
     so_far: &mut Vec<NodeIndex>,
@@ -46,16 +48,18 @@ fn path2<F>(
                 path2(
                     graph,
                     next_node,
+                    start,
                     end,
                     cave_visited_twice,
                     so_far,
                     report_path,
                 );
-            } else if cave_visited_twice.is_none() {
+            } else if cave_visited_twice.is_none() && next_node != start {
                 *cave_visited_twice = Some(next_node);
                 path2(
                     graph,
                     next_node,
+                    start,
                     end,
                     cave_visited_twice,
                     so_far,
