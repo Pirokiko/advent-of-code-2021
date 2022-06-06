@@ -3,8 +3,9 @@ mod pathing2;
 
 use crate::lib::graph::{Graph, NodeIndex};
 use crate::puzzle12::pathing::all_paths;
-use crate::puzzle12::pathing2::all_paths2;
+use crate::puzzle12::pathing2::Pathing;
 use std::collections::HashMap;
+use std::time::Instant;
 
 #[derive(Default)]
 pub struct Cavern {
@@ -33,28 +34,21 @@ pub fn parse(content: &str) -> (Graph<Cavern>, NodeIndex, NodeIndex) {
         let mut caverns = line
             .split("-")
             .map(|node_id| {
-                Cavern::from(
+                if nodes.contains_key(node_id) {
+                    return *nodes.get(node_id).unwrap();
+                }
+                let node_index = graph.add_node(Cavern::from(
                     String::from(node_id),
                     node_id.chars().all(|char| char.is_uppercase()),
-                )
-            })
-            .map(|cavern| {
-                let node_id = String::from(&cavern.id);
-                let is_start = node_id.eq("start");
-                let is_end = node_id.eq("end");
-                if !nodes.contains_key(&node_id) {
-                    let node_index = graph.add_node(cavern);
-                    nodes.insert(node_id, node_index);
-                    if is_start {
-                        start = node_index;
-                    }
-                    if is_end {
-                        end = node_index;
-                    }
-                    node_index
-                } else {
-                    *nodes.get(&cavern.id).unwrap()
+                ));
+                nodes.insert(node_id, node_index);
+                if node_id.eq("start") {
+                    start = node_index;
                 }
+                if node_id.eq("end") {
+                    end = node_index;
+                }
+                node_index
             })
             .collect::<Vec<_>>();
 
@@ -76,9 +70,9 @@ pub fn part1(content: &str) -> usize {
 }
 
 pub fn part2(content: &str) -> usize {
-    let (mut graph, start, end) = parse(content);
-    let paths = all_paths2(&mut graph, start, end);
-    let result = paths.len();
+    let (graph, start, end) = parse(content);
+    let result = Pathing::from(graph, start, end).all_paths();
+
     println!("Answer part 2: {}", result);
     result
 }
