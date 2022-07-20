@@ -1,4 +1,3 @@
-use std::fs;
 use std::process::exit;
 
 enum Action {
@@ -12,8 +11,7 @@ struct Act {
     value: i32,
 }
 
-fn parse() -> Vec<Act> {
-    let content = fs::read_to_string("F:\\AdventOfCode\\puzzle2.txt").expect("to read input file");
+fn parse(content: &str) -> Vec<Act> {
     content
         .lines()
         .map(|line| {
@@ -39,8 +37,8 @@ fn parse() -> Vec<Act> {
         .collect()
 }
 
-pub fn part1() {
-    let actions = parse();
+pub fn part1(content: &str) {
+    let actions = parse(content);
 
     let mut depth = 0;
     let mut pos = 0;
@@ -61,8 +59,8 @@ pub fn part1() {
     )
 }
 
-pub fn part2() {
-    let actions = parse();
+pub fn part2(content: &str) {
+    let actions = parse(content);
 
     let mut aim = 0;
     let mut depth = 0;

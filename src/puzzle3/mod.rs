@@ -1,5 +1,3 @@
-use std::fs;
-
 fn counts(lines: &Vec<&str>) -> Vec<i32> {
     let mut count = vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
@@ -71,10 +69,10 @@ fn extract_rating(lines: &Vec<&str>, idx: usize, dominant: bool) -> i32 {
     extract_rating(&filtered_lines, idx + 1, dominant)
 }
 
-pub fn part1() {
-    let content = fs::read_to_string("F:\\AdventOfCode\\puzzle3.txt").expect("to read input file");
+pub fn part1(content: &str) {
+    let lines: Vec<&str> = content.lines().collect();
 
-    let (gamma, epsilon) = gamma_epsilon(&content.lines().collect());
+    let (gamma, epsilon) = gamma_epsilon(&lines);
 
     println!("Gamma: {}, Epsilon: {}", gamma, epsilon);
 
@@ -91,8 +89,7 @@ pub fn part1() {
     )
 }
 
-pub fn part2() {
-    let content = fs::read_to_string("F:\\AdventOfCode\\puzzle3.txt").expect("to read input file");
+pub fn part2(content: &str) {
     let lines: Vec<&str> = content.lines().collect();
 
     let oxygen_rating = extract_rating(&lines, 0, true);

@@ -48,10 +48,6 @@ impl Board {
         }
     }
 
-    pub fn all_flashed(&self) -> bool {
-        false
-    }
-
     pub fn flash_count(&self) -> usize {
         self.nr_of_flashes
     }

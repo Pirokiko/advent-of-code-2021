@@ -1,5 +1,4 @@
 use std::fmt::{Display, Formatter};
-use std::fs;
 
 #[derive(Debug)]
 struct Cell {
@@ -129,7 +128,7 @@ impl Board {
     }
 }
 
-fn parse(content: String) -> (Vec<usize>, Vec<Board>) {
+fn parse(content: &str) -> (Vec<usize>, Vec<Board>) {
     let mut lines = content.lines().peekable();
 
     let nrs: Vec<usize> = lines
@@ -174,9 +173,8 @@ fn parse(content: String) -> (Vec<usize>, Vec<Board>) {
 //     println!("{}", board)
 // }
 
-pub fn part1() {
-    let (nrs, mut boards) =
-        parse(fs::read_to_string("F:\\AdventOfCode\\puzzle4.txt").expect("to read input file"));
+pub fn part1(content: &str) {
+    let (nrs, mut boards) = parse(content);
 
     'outer: for nr in nrs {
         println!("Processing {}", nr);
@@ -190,9 +188,8 @@ pub fn part1() {
     }
 }
 
-pub fn part2() {
-    let (nrs, mut boards) =
-        parse(fs::read_to_string("F:\\AdventOfCode\\puzzle4.txt").expect("to read input file"));
+pub fn part2(content: &str) {
+    let (nrs, mut boards) = parse(content);
 
     let mut last_board_to_win = 0;
 

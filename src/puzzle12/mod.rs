@@ -5,7 +5,6 @@ use crate::lib::graph::{Graph, NodeIndex};
 use crate::puzzle12::pathing::all_paths;
 use crate::puzzle12::pathing2::Pathing;
 use std::collections::HashMap;
-use std::time::Instant;
 
 #[derive(Default)]
 pub struct Cavern {

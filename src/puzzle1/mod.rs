@@ -1,5 +1,3 @@
-use std::fs;
-
 fn nr_of_increases(nrs: Vec<i32>) -> i32 {
     let mut count = 0;
     let mut prev = i32::MAX;
@@ -12,22 +10,21 @@ fn nr_of_increases(nrs: Vec<i32>) -> i32 {
     count
 }
 
-fn nrs() -> Vec<i32> {
-    let content = fs::read_to_string("F:\\AdventOfCode\\puzzle1.txt").expect("to read input file");
+fn nrs(content: &str) -> Vec<i32> {
     content
         .lines()
         .map(|line| line.parse().expect("input to be string"))
         .collect()
 }
 
-pub fn part1() {
-    let count = nr_of_increases(nrs());
+pub fn part1(content: &str) {
+    let count = nr_of_increases(nrs(content));
 
     println!("The slope count is: {}", count);
 }
 
-pub fn part2() {
-    let nrs = nrs();
+pub fn part2(content: &str) {
+    let nrs = nrs(content);
 
     let mut windowed_nrs = nrs.clone();
 
