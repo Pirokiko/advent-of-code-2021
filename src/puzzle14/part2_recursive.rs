@@ -146,8 +146,8 @@ pub fn part1(content: &str) -> usize {
 
 #[cfg(test)]
 mod test {
-    use crate::puzzle14::part2_recursive2::part1;
-    use crate::puzzle14::part2_recursive2::part2;
+    use crate::puzzle14::part2_recursive::part1;
+    use crate::puzzle14::part2_recursive::part2;
 
     static TEST_CONTENT: &'static str = include_str!("test.txt");
 
