@@ -20,7 +20,7 @@ impl Swaps {
 struct PairInsertion {
     swaps: Swaps,
     counts: Counts,
-    add_counter: usize,
+    add_counter: usize, // Attempt to see what it is that scales exponentially with increase in iterations
 }
 
 impl PairInsertion {
@@ -159,5 +159,83 @@ mod test {
     #[test]
     fn part1_works() {
         assert_eq!(1588, part1(TEST_CONTENT));
+    }
+}
+
+#[cfg(test)]
+mod test_add {
+
+    use std::collections::HashMap;
+
+    static ITERATIONS: usize = 3145729;
+
+    #[test]
+    fn addition() {
+        let mut count = 0;
+
+        for _ in 0..ITERATIONS {
+            count += 1;
+        }
+
+        assert_eq!(ITERATIONS, count);
+    }
+
+    #[test]
+    fn addition_map_get_mut() {
+        let key = 'a';
+
+        let mut data = HashMap::new();
+        data.insert(key, 0);
+
+        for _ in 0..ITERATIONS {
+            *data.get_mut(&key).unwrap() += 1;
+        }
+
+        assert_eq!(ITERATIONS, *data.get_mut(&key).unwrap());
+    }
+
+    #[test]
+    fn addition_map_entry_deref() {
+        let key = 'a';
+
+        let mut data = HashMap::new();
+        data.insert(key, 0);
+
+        for _ in 0..ITERATIONS {
+            *data.entry(key).or_insert(0) += 1;
+        }
+
+        assert_eq!(ITERATIONS, *data.get(&key).unwrap());
+    }
+
+    #[test]
+    fn addition_map_entry_add() {
+        let key = 'a';
+
+        let mut data = HashMap::new();
+        data.insert(key, 0);
+
+        for _ in 0..ITERATIONS {
+            data.entry(key).and_modify(|x| *x += 1);
+        }
+
+        assert_eq!(ITERATIONS, *data.get(&key).unwrap());
+    }
+
+    #[test]
+    fn addition_vector() {
+        let key = 'a';
+        let mut counts = vec![];
+        if (counts.len() <= key as usize) {
+            counts.resize(key as usize + 1, 0);
+        }
+
+        counts[key as usize] = 0;
+
+        for _ in 0..ITERATIONS {
+            counts[key as usize] += 1;
+        }
+
+        assert_eq!(ITERATIONS, counts[key as usize]);
     }
 }
