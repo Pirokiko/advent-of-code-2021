@@ -18,17 +18,6 @@ pub fn part1(content: &str) {
     println!("Least fuel for median: {}", fuel);
 }
 
-fn cost(nr: usize) -> usize {
-    if nr == 0 {
-        return 0;
-    }
-    if nr == 1 {
-        return 1;
-    }
-
-    nr + cost(nr - 1)
-}
-
 // each move more cost the amount of the move in their chain of moves so: first moves costs 1, second move costs 2, third move costs 3, etc
 // So moving 3 positions, costs 1 + 2 + 3 => 6 in total
 pub fn part2(content: &str) {

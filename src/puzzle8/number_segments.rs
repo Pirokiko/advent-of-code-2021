@@ -209,16 +209,6 @@ impl Line {
     }
 }
 
-fn get_filtered_patterns<F>(patterns: Vec<&String>, filters: Vec<F>) -> Vec<&String>
-where
-    F: Fn(&String) -> bool,
-{
-    patterns
-        .into_iter()
-        .filter(|item| filters.iter().all(|filter| filter(item)))
-        .collect()
-}
-
 fn get_patterns_filtered<P>(line: &Line, filter: P) -> Vec<&String>
 where
     P: FnMut(&&String) -> bool,

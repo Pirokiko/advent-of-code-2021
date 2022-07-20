@@ -22,21 +22,6 @@ impl Position {
         self.delta += if increase { 1 } else { -1 };
         self.cost += self.delta.abs() as usize;
     }
-
-    fn move_cost(&self) -> usize {
-        self.delta.abs() as usize + 1
-    }
-}
-
-fn cost(nr: usize) -> usize {
-    if nr == 0 {
-        return 0;
-    }
-    if nr == 1 {
-        return 1;
-    }
-
-    nr + cost(nr - 1)
 }
 
 fn move_cost_min(positions: &Vec<Position>) -> isize {
@@ -108,7 +93,7 @@ pub fn transform_and_least_fuel(pos_nrs: Vec<isize>) -> usize {
 #[cfg(test)]
 mod tests {
     use crate::puzzle7::least_cost::{
-        cost, move_cost_max, move_cost_min, move_max, move_min, transform_and_least_fuel, Position,
+        move_cost_max, move_cost_min, move_max, move_min, transform_and_least_fuel, Position,
     };
 
     #[test]
@@ -125,18 +110,18 @@ mod tests {
         );
     }
 
-    #[test]
-    fn cost_works() {
-        assert_eq!(0, cost(0));
-        assert_eq!(1, cost(1));
-        assert_eq!(3, cost(2));
-        assert_eq!(6, cost(3));
-        assert_eq!(55, cost(10));
-        assert_eq!(120, cost(15));
-    }
-
     fn positions(values: Vec<isize>) -> Vec<Position> {
         values.iter().map(|value| Position::from(*value)).collect()
+    }
+
+    fn cost(nr: usize) -> usize {
+        if nr == 0 {
+            0
+        } else if nr == 1 {
+            1
+        } else {
+            nr + cost(nr - 1)
+        }
     }
 
     fn pos(value: isize, steps: isize) -> Position {

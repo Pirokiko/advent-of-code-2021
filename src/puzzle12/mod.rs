@@ -8,18 +8,13 @@ use std::collections::HashMap;
 
 #[derive(Default)]
 pub struct Cavern {
-    id: String,
     large: bool,
     visited: usize,
 }
 
 impl Cavern {
-    fn from(id: String, large: bool) -> Cavern {
-        Cavern {
-            id,
-            large,
-            visited: 0,
-        }
+    fn from(large: bool) -> Cavern {
+        Cavern { large, visited: 0 }
     }
 }
 
@@ -37,7 +32,6 @@ pub fn parse(content: &str) -> (Graph<Cavern>, NodeIndex, NodeIndex) {
                     return *nodes.get(node_id).unwrap();
                 }
                 let node_index = graph.add_node(Cavern::from(
-                    String::from(node_id),
                     node_id.chars().all(|char| char.is_uppercase()),
                 ));
                 nodes.insert(node_id, node_index);
