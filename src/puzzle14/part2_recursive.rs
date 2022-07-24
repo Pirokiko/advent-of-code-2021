@@ -50,6 +50,38 @@ impl<T: Clone + PartialOrd + PartialEq> Data<T> {
         }
     }
 
+    fn get_mut(&mut self, key: &char) -> Option<&mut T> {
+        match *key {
+            'B' => Some(&mut self.b),
+            'C' => Some(&mut self.c),
+            'F' => Some(&mut self.f),
+            'H' => Some(&mut self.h),
+            'K' => Some(&mut self.k),
+            'N' => Some(&mut self.n),
+            'O' => Some(&mut self.o),
+            'P' => Some(&mut self.p),
+            'S' => Some(&mut self.s),
+            'V' => Some(&mut self.v),
+            _ => None,
+        }
+    }
+
+    fn set(&mut self, key: &char, value: T) {
+        match *key {
+            'B' => self.b = value,
+            'C' => self.c = value,
+            'F' => self.f = value,
+            'H' => self.h = value,
+            'K' => self.k = value,
+            'N' => self.n = value,
+            'O' => self.o = value,
+            'P' => self.p = value,
+            'S' => self.s = value,
+            'V' => self.v = value,
+            _ => {}
+        }
+    }
+
     fn min_max(&self, ignore: &T) -> (Option<&T>, Option<&T>) {
         let mut min: Option<&T> = None;
         let mut max: Option<&T> = None;
@@ -105,30 +137,19 @@ impl Counting {
 }
 
 struct SwapMap {
-    data: Vec<Vec<char>>,
+    data: Data<Data<char>>,
 }
 
 impl SwapMap {
     fn get(&self, first: &char, second: &char) -> Option<char> {
         self.data
-            .get(*first as usize)
-            .map_or(None, |char_map| char_map.get(*second as usize))
+            .get(first)
+            .map_or(None, |char_map| char_map.get(second))
             .map_or(None, |char| Some(*char))
     }
 
     fn insert(&mut self, first: char, second: char, value: char) {
-        self.ensure_keys(first, second);
-        self.data[first as usize][second as usize] = value;
-    }
-
-    fn ensure_keys(&mut self, first: char, second: char) {
-        if self.data.len() <= first as usize {
-            self.data.resize(first as usize + 1, Vec::new());
-        }
-
-        if self.data[first as usize].len() <= second as usize {
-            self.data[first as usize].resize(second as usize + 1, ' ');
-        }
+        self.data.get_mut(&first).unwrap().set(&second, value);
     }
 }
 
@@ -208,7 +229,9 @@ fn parse(content: &str) -> (Vec<char>, PairInsertion) {
     let polymer = lines.next().unwrap().chars().collect();
     lines.next(); // skip empty line
 
-    let mut swaps = SwapMap { data: vec![] };
+    let mut swaps = SwapMap {
+        data: Data::new(Data::new(' ')),
+    };
 
     for (first, second, insert) in lines.map(parse_swap) {
         swaps.insert(first, second, insert);
