@@ -1,4 +1,8 @@
 use std::collections::HashMap;
+use std::ops::Add;
+
+// Using a specialized datastructure with specific keys, was easily over 16 times faster
+// than using HashMap & still orders faster than using Vec with char indexes
 
 #[derive(Clone, PartialOrd, PartialEq)]
 struct Data<T: Clone + PartialOrd + PartialEq> {
@@ -15,6 +19,21 @@ struct Data<T: Clone + PartialOrd + PartialEq> {
 }
 
 impl<T: Clone + PartialOrd + PartialEq> Data<T> {
+    fn new(default: T) -> Data<T> {
+        Data {
+            b: default.clone(),
+            c: default.clone(),
+            f: default.clone(),
+            h: default.clone(),
+            k: default.clone(),
+            n: default.clone(),
+            o: default.clone(),
+            p: default.clone(),
+            s: default.clone(),
+            v: default.clone(),
+        }
+    }
+
     fn get(&self, key: &char) -> Option<&T> {
         match *key {
             'B' => Some(&self.b),
@@ -32,21 +51,19 @@ impl<T: Clone + PartialOrd + PartialEq> Data<T> {
     }
 
     fn min_max(&self, ignore: &T) -> (Option<&T>, Option<&T>) {
-        let keys = vec!['B', 'C', 'F', 'H', 'K', 'N', 'O', 'P', 'S', 'V'];
-
         let mut min: Option<&T> = None;
         let mut max: Option<&T> = None;
 
-        for key in keys {
-            let val = self.get(&key);
-
-            if val.is_some() && val.unwrap().ne(ignore) {
-                if min.is_none() || val.unwrap().lt(min.unwrap()) {
-                    min = Some(val.unwrap());
-                }
-                if max.is_none() || val.unwrap().gt(max.unwrap()) {
-                    max = Some(val.unwrap());
-                }
+        for val in vec!['B', 'C', 'F', 'H', 'K', 'N', 'O', 'P', 'S', 'V']
+            .iter()
+            .map(|key| self.get(key))
+            .filter(|opt| opt.is_some() && opt.unwrap().ne(ignore))
+        {
+            if min.is_none() || val.unwrap().lt(min.unwrap()) {
+                min = Some(val.unwrap());
+            }
+            if max.is_none() || val.unwrap().gt(max.unwrap()) {
+                max = Some(val.unwrap());
             }
         }
 
@@ -57,21 +74,6 @@ impl<T: Clone + PartialOrd + PartialEq> Data<T> {
 type Counting = Data<usize>;
 
 impl Counting {
-    fn new() -> Counting {
-        Counting {
-            b: 0,
-            c: 0,
-            f: 0,
-            h: 0,
-            k: 0,
-            n: 0,
-            o: 0,
-            p: 0,
-            s: 0,
-            v: 0,
-        }
-    }
-
     fn increment(&mut self, key: &char) {
         match *key {
             'B' => self.b += 1,
@@ -101,18 +103,6 @@ impl Counting {
         self.v += counts.v;
     }
 }
-
-// type Swaps = Data<Data<char>>;
-//
-// impl Swaps {
-//     fn get_for_pair(&self, first: &char, second: &char) -> Option<&char> {
-//         self.get(first)
-//             .map_or(None, |char_map| char_map.get(second))
-//     }
-// }
-
-// HashMap access & update is really slow, so faking it using Vec
-// type SwapMap = HashMap<char, HashMap<char, char>>;
 
 struct SwapMap {
     data: Vec<Vec<char>>,
@@ -164,37 +154,44 @@ impl PairInsertion {
     }
 
     fn count_recursive(&mut self, first: &char, second: &char, iterations_left: usize) -> Counting {
-        let mut counting = Counting::new();
         if iterations_left == 0 {
-            return counting;
+            return Counting::new(0);
+        }
+
+        match self.cache.get(&(*first, *second, iterations_left)) {
+            None => {}
+            Some(cached_counts) => {
+                self.counts.merge(cached_counts);
+                return cached_counts.clone();
+            }
         }
 
         let cache = self.cache.get(&(*first, *second, iterations_left));
         if cache.is_some() {
             self.counts.merge(cache.unwrap());
-            counting.merge(cache.unwrap());
-            return counting;
+            return cache.unwrap().clone();
         }
 
+        let mut counting = Counting::new(0);
         match self.swaps.get(first, second) {
             None => {}
             Some(insert) => {
                 let first_search = self.count_recursive(first, &insert, iterations_left - 1);
                 counting.merge(&first_search);
-                self.cache
-                    .insert((*first, insert, iterations_left - 1), first_search);
 
                 self.add(&insert);
                 counting.increment(&insert);
 
                 let after_search = self.count_recursive(&insert, second, iterations_left - 1);
                 counting.merge(&after_search);
-                self.cache
-                    .insert((insert, *second, iterations_left - 1), after_search);
             }
         }
 
-        counting
+        let result = counting.clone();
+        // Save for future use
+        self.cache
+            .insert((*first, *second, iterations_left), counting);
+        result
     }
 }
 
@@ -221,7 +218,7 @@ fn parse(content: &str) -> (Vec<char>, PairInsertion) {
         polymer,
         PairInsertion {
             swaps,
-            counts: Counting::new(),
+            counts: Counting::new(0),
             cache: HashMap::new(),
         },
     )
