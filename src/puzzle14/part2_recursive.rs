@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::ops::Add;
 
 // Using a specialized datastructure with specific keys, was easily over 16 times faster
 // than using HashMap & still orders faster than using Vec with char indexes
@@ -377,7 +376,7 @@ mod test_add {
     fn addition_vector() {
         let key = 'a';
         let mut counts = vec![];
-        if (counts.len() <= key as usize) {
+        if counts.len() <= key as usize {
             counts.resize(key as usize + 1, 0);
         }
 

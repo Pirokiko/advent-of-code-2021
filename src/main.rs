@@ -5,6 +5,7 @@ mod puzzle11;
 mod puzzle12;
 mod puzzle13;
 mod puzzle14;
+mod puzzle15;
 mod puzzle2;
 mod puzzle3;
 mod puzzle4;
@@ -93,7 +94,15 @@ fn main() {
         puzzle13::part2(content_puzzle13);
     }
 
-    let content_puzzle14 = include_str!("puzzle14/puzzle14.txt");
-    puzzle14::part2_recursive::part1(content_puzzle14);
-    puzzle14::part2_recursive::part2(content_puzzle14);
+    if cfg!(puzzle = "puzzle14") {
+        let content_puzzle14 = include_str!("puzzle14/puzzle14.txt");
+        puzzle14::part2_recursive::part1(content_puzzle14);
+        puzzle14::part2_recursive::part2(content_puzzle14);
+    }
+
+    // if cfg!(puzzle = "puzzle15") {
+    let content_puzzle15 = include_str!("puzzle15/puzzle15.txt");
+    puzzle15::part1::part1(content_puzzle15);
+    puzzle15::part2::part2(content_puzzle15);
+    // }
 }
