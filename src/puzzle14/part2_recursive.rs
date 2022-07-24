@@ -1,33 +1,4 @@
-// type Counts = HashMap<char, usize>;
-
-// Using a HashMap<char,usize> is magnitudes slower :(
-// 3_000_000 additions on a hardcoded key took 1.9 seconds
-// 3_000_000 additions through this case char as usize trick on a vector took 166 ms
-struct Counts {
-    data: Vec<usize>,
-}
-
-impl Counts {
-    fn get(&self, key: char) -> usize {
-        self.data[key as usize]
-    }
-
-    // fn insert(&mut self, key: char, value: usize) {
-    //     self.ensure_key(&key);
-    //     self.data[key as usize] = value;
-    // }
-
-    fn ensure_key(&mut self, key: &char) {
-        if self.data.len() <= *key as usize {
-            self.data.resize(*key as usize + 1, 0);
-        }
-    }
-
-    fn increment(&mut self, key: &char) {
-        self.ensure_key(key);
-        self.data[*key as usize] += 1;
-    }
-}
+use std::collections::HashMap;
 
 #[derive(Clone, PartialOrd, PartialEq)]
 struct Data<T: Clone + PartialOrd + PartialEq> {
@@ -116,6 +87,19 @@ impl Counting {
             _ => {}
         }
     }
+
+    fn merge(&mut self, counts: &Counting) {
+        self.b += counts.b;
+        self.c += counts.c;
+        self.f += counts.f;
+        self.h += counts.h;
+        self.k += counts.k;
+        self.n += counts.n;
+        self.o += counts.o;
+        self.p += counts.p;
+        self.s += counts.s;
+        self.v += counts.v;
+    }
 }
 
 // type Swaps = Data<Data<char>>;
@@ -161,7 +145,7 @@ impl SwapMap {
 struct PairInsertion {
     swaps: SwapMap,
     counts: Counting,
-    // add_counter: usize, // Attempt to see what it is that scales exponentially with increase in iterations
+    cache: HashMap<(char, char, usize), Counting>,
 }
 
 impl PairInsertion {
@@ -176,24 +160,41 @@ impl PairInsertion {
     }
 
     fn add(&mut self, char: &char) {
-        // print!("{}", char);
         self.counts.increment(char);
-        // self.add_counter += 1;
     }
 
-    fn count_recursive(&mut self, first: &char, second: &char, iterations_left: usize) {
+    fn count_recursive(&mut self, first: &char, second: &char, iterations_left: usize) -> Counting {
+        let mut counting = Counting::new();
         if iterations_left == 0 {
-            return;
+            return counting;
+        }
+
+        let cache = self.cache.get(&(*first, *second, iterations_left));
+        if cache.is_some() {
+            self.counts.merge(cache.unwrap());
+            counting.merge(cache.unwrap());
+            return counting;
         }
 
         match self.swaps.get(first, second) {
             None => {}
             Some(insert) => {
-                self.count_recursive(first, &insert, iterations_left - 1);
+                let first_search = self.count_recursive(first, &insert, iterations_left - 1);
+                counting.merge(&first_search);
+                self.cache
+                    .insert((*first, insert, iterations_left - 1), first_search);
+
                 self.add(&insert);
-                self.count_recursive(&insert, second, iterations_left - 1);
+                counting.increment(&insert);
+
+                let after_search = self.count_recursive(&insert, second, iterations_left - 1);
+                counting.merge(&after_search);
+                self.cache
+                    .insert((insert, *second, iterations_left - 1), after_search);
             }
         }
+
+        counting
     }
 }
 
@@ -220,28 +221,10 @@ fn parse(content: &str) -> (Vec<char>, PairInsertion) {
         polymer,
         PairInsertion {
             swaps,
-            // counts: Counts { data: vec![] },
             counts: Counting::new(),
-            // add_counter: 0,
+            cache: HashMap::new(),
         },
     )
-}
-
-fn most_and_least(counts: &Counts) -> (usize, usize) {
-    let mut min = usize::MAX;
-    let mut max = usize::MIN;
-
-    for count in counts.data.iter().filter(|c| **c != 0) {
-        if *count > max {
-            max = *count;
-        }
-
-        if *count < min {
-            min = *count;
-        }
-    }
-
-    (max, min)
 }
 
 fn process(content: &str, iteration_count: usize) -> usize {
@@ -249,16 +232,13 @@ fn process(content: &str, iteration_count: usize) -> usize {
 
     let counts = pair_insertion.counts(&polymer, iteration_count);
 
-    // let (most, least) = most_and_least(counts);
     let (least, most) = counts.min_max(&0);
-
-    // println!("Add count: {}", pair_insertion.add_counter);
 
     most.unwrap() - least.unwrap()
 }
 
 pub fn part2(content: &str) -> usize {
-    let result = process(content, 26);
+    let result = process(content, 40);
     println!("Part2 answer: {}", result);
     result
 }
