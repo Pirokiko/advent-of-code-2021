@@ -1,6 +1,7 @@
 use crate::lib::graph2::{Graph, VertexIndex};
 use std::cmp::Reverse;
 
+mod parsing;
 pub(crate) mod part1;
 pub(crate) mod part2;
 
