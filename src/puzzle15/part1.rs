@@ -1,5 +1,6 @@
 use crate::lib::graph::NodeIndex;
 use crate::lib::graph2::Graph;
+use crate::puzzle15::ShortestPath;
 
 fn char_to_usize(char: char) -> usize {
     usize::from_str_radix(&char.to_string(), 10).expect("char to be a digit")
@@ -59,16 +60,19 @@ fn parse(content: &str) -> (Graph, Vec<usize>, NodeIndex) {
 }
 
 pub fn part1(content: &str) -> usize {
-    let (graph, weights, end_index) = parse(content);
+    let (graph, weights, end) = parse(content);
 
-    let path = graph
-        .shortest_path(0, end_index)
-        .calculate(weights.as_slice());
+    let pathing = ShortestPath {
+        graph,
+        start: 0,
+        end,
+        weights,
+    };
 
-    // let distances = graph.dijkstra(weights.as_slice(), end_index);
+    let cost = pathing.calculate_cost();
 
-    println!("{:?}", path);
-    path.unwrap().cost
+    println!("{:?}", cost);
+    cost
 }
 
 #[cfg(test)]
@@ -76,9 +80,15 @@ mod tests {
     use crate::puzzle15::part1::part1;
 
     static TEST_CONTENT: &'static str = include_str!("test.txt");
+    static PUZZLE_CONTENT: &'static str = include_str!("puzzle15.txt");
 
     #[test]
     fn part1_works() {
         assert_eq!(40, part1(TEST_CONTENT));
+    }
+
+    #[test]
+    fn part1_puzzle_works() {
+        assert_eq!(696, part1(PUZZLE_CONTENT))
     }
 }
