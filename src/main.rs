@@ -1,3 +1,5 @@
+extern crate core;
+
 mod lib;
 mod puzzle1;
 mod puzzle10;
@@ -6,6 +8,7 @@ mod puzzle12;
 mod puzzle13;
 mod puzzle14;
 mod puzzle15;
+mod puzzle16;
 mod puzzle2;
 mod puzzle3;
 mod puzzle4;
@@ -100,9 +103,13 @@ fn main() {
         puzzle14::part2_recursive::part2(content_puzzle14);
     }
 
-    // if cfg!(puzzle = "puzzle15") {
-    let content_puzzle15 = include_str!("puzzle15/puzzle15.txt");
-    puzzle15::part1::part1(content_puzzle15);
-    puzzle15::part2::part2(content_puzzle15);
-    // }
+    if cfg!(puzzle = "puzzle15") {
+        let content_puzzle15 = include_str!("puzzle15/puzzle15.txt");
+        puzzle15::part1::part1(content_puzzle15);
+        puzzle15::part2::part2(content_puzzle15);
+    }
+
+    let content_puzzle16 = include_str!("puzzle16/puzzle16.txt");
+    puzzle16::part1::part1(content_puzzle16);
+    puzzle16::part2::part2(content_puzzle16);
 }
