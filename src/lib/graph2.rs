@@ -1,7 +1,7 @@
 /// Define types to ensure only the expected values are used,
 /// instead of mixing the usage of edges and vertices
-type VertexIndex = usize;
-type EdgeIndex = usize;
+pub type VertexIndex = usize;
+pub type EdgeIndex = usize;
 
 /// A compact graph representation. Edges are numbered in order of insertion.
 /// Each adjacency list consists of all edges pointing out from a given vertex.

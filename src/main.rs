@@ -103,6 +103,6 @@ fn main() {
     // if cfg!(puzzle = "puzzle15") {
     let content_puzzle15 = include_str!("puzzle15/puzzle15.txt");
     puzzle15::part1::part1(content_puzzle15);
-    puzzle15::part2::part2(content_puzzle15);
+    // puzzle15::part2::part2(content_puzzle15);
     // }
 }

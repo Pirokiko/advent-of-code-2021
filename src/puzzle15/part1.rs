@@ -61,9 +61,14 @@ fn parse(content: &str) -> (Graph, Vec<usize>, NodeIndex) {
 pub fn part1(content: &str) -> usize {
     let (graph, weights, end_index) = parse(content);
 
-    let distances = graph.dijkstra(weights.as_slice(), end_index);
+    let path = graph
+        .shortest_path(0, end_index)
+        .calculate(weights.as_slice());
 
-    distances[0]
+    // let distances = graph.dijkstra(weights.as_slice(), end_index);
+
+    println!("{:?}", path);
+    path.unwrap().cost
 }
 
 #[cfg(test)]
