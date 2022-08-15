@@ -1,123 +1,13 @@
-use std::isize;
-
-pub type Value = isize;
-
-pub type Version = u8;
-pub type TypeID = u8;
-
-pub trait Packet {
-    fn base(&self) -> &BasePacket;
-
-    fn version(&self) -> Version {
-        self.base().version
-    }
-    fn type_id(&self) -> TypeID {
-        self.base().type_id
-    }
-
-    fn calculate(&self) -> Value;
-
-    fn version_sum(&self) -> Version;
-}
-
-struct BasePacket {
-    version: Version,
-    type_id: TypeID,
-}
-
-impl BasePacket {
-    fn new(version: Version, type_id: TypeID) -> BasePacket {
-        BasePacket { version, type_id }
-    }
-}
-
-enum Operator {
-    ADD,
-    SUBTRACT,
-    MULTIPLY,
-}
-
-struct LiteralPacket {
-    base_packet: BasePacket,
-    value: isize,
-}
-
-impl LiteralPacket {
-    fn new(base_packet: BasePacket, value: Value) -> LiteralPacket {
-        LiteralPacket { base_packet, value }
-    }
-}
-
-struct OperatorPacket {
-    base_packet: BasePacket,
-    operator: Operator,
-    children: Vec<Box<dyn Packet>>,
-}
-
-impl OperatorPacket {
-    fn new(
-        base_packet: BasePacket,
-        operator: Operator,
-        children: Vec<Box<dyn Packet>>,
-    ) -> OperatorPacket {
-        OperatorPacket {
-            base_packet,
-            operator,
-            children,
-        }
-    }
-}
-
-impl Packet for LiteralPacket {
-    fn base(&self) -> &BasePacket {
-        &self.base_packet
-    }
-
-    fn calculate(&self) -> Value {
-        self.value
-    }
-
-    fn version_sum(&self) -> Version {
-        self.version()
-    }
-}
-
-impl Packet for OperatorPacket {
-    fn base(&self) -> &BasePacket {
-        &self.base_packet
-    }
-
-    fn calculate(&self) -> Value {
-        let t: u8 = 4;
-        let s: u8 = 4;
-
-        let q = t + s;
-        match &self.operator {
-            Operator::ADD => self
-                .children
-                .iter()
-                .fold(0, |acc, child| acc + child.calculate()),
-            Operator::SUBTRACT => self
-                .children
-                .iter()
-                .fold(-0, |acc, child| acc - child.calculate()),
-            Operator::MULTIPLY => 2,
-        }
-    }
-
-    fn version_sum(&self) -> Version {
-        self.version()
-            + self
-                .children
-                .iter()
-                .fold(0, |acc, child| acc + child.version())
-    }
-}
+use crate::puzzle16::packet::{
+    BasePacket, LiteralPacket, Operator, OperatorPacket, Packet, TypeID, Value, Version,
+};
 
 fn parse_version(data: &str) -> Version {
+    // println!("parse_version({})", data);
     u8::from_str_radix(data, 2).expect("Should be binary data")
 }
 fn parse_type_id(data: &str) -> TypeID {
+    // println!("parse_type_id({})", data);
     u8::from_str_radix(data, 2).expect("Should be binary data")
 }
 
@@ -164,45 +54,79 @@ fn parse_literal_value(content: &str) -> (Value, usize) {
     )
 }
 
-pub fn parse(content: &str) -> Box<dyn Packet> {
-    parse_packet(content)
+fn parse_literal_packet(base_packet: BasePacket, content: &str) -> (Box<LiteralPacket>, usize) {
+    let (value, length) = parse_literal_value(content);
+    return (Box::new(LiteralPacket::new(base_packet, value)), length);
 }
-pub fn parse_packet(content: &str) -> Box<dyn Packet> {
-    let header = &content[0..6];
-    let version = parse_version(&header[0..3]);
-    let type_id = parse_type_id(&header[3..6]);
+
+pub fn parse(content: &str) -> Box<dyn Packet> {
+    let binary_content = parse_to_binary(content);
+    // println!("binary: {}", &binary_content);
+    let (packet, _) = parse_packet(&binary_content);
+    packet
+}
+pub fn parse_packet(content: &str) -> (Box<dyn Packet>, usize) {
+    // println!("parse_packet: content: {}", content);
+    let version = parse_version(&content[0..3]);
+    let type_id = parse_type_id(&content[3..6]);
     let base_packet = BasePacket::new(version, type_id);
+    // println!("{:?}", base_packet);
 
     if type_id == 4 {
-        let (value, offset) = parse_literal_value(&content[6..]);
-        return Box::new(LiteralPacket::new(base_packet, value));
+        let (packet, length) = parse_literal_packet(base_packet, &content[6..]);
+        return (packet, length + 6);
+    }
+    let (packet, length) = parse_operator_packet(base_packet, &content[6..]);
+    (packet, length + 6)
+}
+
+fn parse_nr_of_packets(content: &str, amount: usize) -> (Vec<Box<dyn Packet>>, usize) {
+    let mut result = vec![];
+
+    let mut offset = 0;
+    for _ in 0..amount {
+        let (packet, length) = parse_packet(&content[offset..]);
+        result.push(packet);
+        offset += length;
     }
 
-    parse_operator_packet(base_packet, &content[7..])
+    (result, offset)
 }
 
-fn parse_nr_of_packets(content: &str, amount: usize) -> Vec<Box<dyn Packet>> {
-    let result = vec![];
+fn parse_packets_with_length(content: &str) -> (Vec<Box<dyn Packet>>, usize) {
+    // println!("parse_packets_with_length: content: {}", content);
+    let mut result = vec![];
 
-    result
+    let mut offset = 0;
+    while offset < content.len() {
+        let (packet, length) = parse_packet(&content[offset..]);
+        // println!("parse_packets_with_length: length: {}", length);
+        result.push(packet);
+        offset += length;
+    }
+
+    (result, content.len())
 }
 
-fn parse_packets_with_length(content: &str) -> Vec<Box<dyn Packet>> {
-    let result = vec![];
+fn parse_operator_packet(base_packet: BasePacket, content: &str) -> (Box<OperatorPacket>, usize) {
+    let length_type_id = &content[0..1];
+    // println!("parse_operator_packet: length_type_id: {}", length_type_id);
 
-    result
-}
-
-fn parse_operator_packet(base_packet: BasePacket, content: &str) -> Box<OperatorPacket> {
-    let length_type_id = content.as_bytes()[0];
-
-    let children = if length_type_id == b'0' {
-        let total_length = usize::from_str_radix(&content[1..16], 2).expect("binary data");
-        parse_packets_with_length(&content[16..total_length + 16])
+    let (children, length) = if length_type_id == "0" {
+        // println!("parse length: {}", &content[1..16]);
+        let length = usize::from_str_radix(&content[1..16], 2).expect("binary data");
+        // println!("length: {}", length);
+        let (packet, length) = parse_packets_with_length(&content[16..length + 16]);
+        (packet, length + 16)
     } else {
-        let nr_of_children = usize::from_str_radix(&content[1..16], 2).expect("binary data");
-        parse_nr_of_packets(&content[16..], nr_of_children)
+        let nr_of_children = usize::from_str_radix(&content[1..12], 2).expect("binary data");
+        // println!("nr_of_children: {}", nr_of_children);
+        let (packet, length) = parse_nr_of_packets(&content[12..], nr_of_children);
+        (packet, length + 12)
     };
 
-    Box::new(OperatorPacket::new(base_packet, Operator::ADD, children))
+    (
+        Box::new(OperatorPacket::new(base_packet, Operator::ADD, children)),
+        length,
+    )
 }
