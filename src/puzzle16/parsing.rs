@@ -1,10 +1,12 @@
 use crate::puzzle16::packet::{
     BasePacket, LiteralPacket, Operator, OperatorPacket, Packet, TypeID, Value, Version,
 };
+use std::any::Any;
+use std::mem::swap;
 
 fn parse_version(data: &str) -> Version {
     // println!("parse_version({})", data);
-    u8::from_str_radix(data, 2).expect("Should be binary data")
+    usize::from_str_radix(data, 2).expect("Should be binary data")
 }
 fn parse_type_id(data: &str) -> TypeID {
     // println!("parse_type_id({})", data);
@@ -125,8 +127,22 @@ fn parse_operator_packet(base_packet: BasePacket, content: &str) -> (Box<Operato
         (packet, length + 12)
     };
 
+    let operator = operator_for_type_id(base_packet.type_id());
     (
-        Box::new(OperatorPacket::new(base_packet, Operator::ADD, children)),
+        Box::new(OperatorPacket::new(base_packet, operator, children)),
         length,
     )
+}
+
+fn operator_for_type_id(type_id: TypeID) -> Operator {
+    match type_id {
+        0 => Operator::Sum,
+        1 => Operator::Product,
+        2 => Operator::Minimum,
+        3 => Operator::Maximum,
+        5 => Operator::GreaterThan,
+        6 => Operator::LessThan,
+        7 => Operator::EqualTo,
+        _ => panic!("invalid type_id found"),
+    }
 }

@@ -4,7 +4,7 @@ use crate::puzzle16::parsing::parse;
 pub(crate) fn part1(content: &str) -> Version {
     let packet = parse(content);
     let result = packet.version_sum();
-    println!("{}", result);
+    println!("Part 1: {}", result);
     result
 }
 

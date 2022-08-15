@@ -1,6 +1,6 @@
 pub type Value = isize;
 
-pub type Version = u8;
+pub type Version = usize;
 pub type TypeID = u8;
 
 pub trait Packet {
@@ -28,13 +28,21 @@ impl BasePacket {
     pub fn new(version: Version, type_id: TypeID) -> BasePacket {
         BasePacket { version, type_id }
     }
+
+    pub fn type_id(&self) -> TypeID {
+        self.type_id
+    }
 }
 
 #[derive(Debug)]
 pub enum Operator {
-    ADD,
-    SUBTRACT,
-    MULTIPLY,
+    Sum,
+    Product,
+    Minimum,
+    Maximum,
+    GreaterThan,
+    LessThan,
+    EqualTo,
 }
 
 #[derive(Debug)]
@@ -90,18 +98,56 @@ impl Packet for OperatorPacket {
 
     fn calculate(&self) -> Value {
         match &self.operator {
-            Operator::ADD => self
+            Operator::Sum => self
                 .children
                 .iter()
                 .fold(0, |acc, child| acc + child.calculate()),
-            Operator::SUBTRACT => self
-                .children
-                .iter()
-                .fold(-0, |acc, child| acc - child.calculate()),
-            Operator::MULTIPLY => self
+            Operator::Product => self
                 .children
                 .iter()
                 .fold(1, |acc, child| acc * child.calculate()),
+            Operator::Minimum => self
+                .children
+                .iter()
+                .map(|child| child.calculate())
+                .min()
+                .unwrap(),
+            Operator::Maximum => self
+                .children
+                .iter()
+                .map(|child| child.calculate())
+                .max()
+                .unwrap(),
+            Operator::GreaterThan => {
+                let mut child_iter = self.children.iter();
+                let first = child_iter.next().unwrap();
+                let second = child_iter.next().unwrap();
+                if first.calculate() > second.calculate() {
+                    1
+                } else {
+                    0
+                }
+            }
+            Operator::LessThan => {
+                let mut child_iter = self.children.iter();
+                let first = child_iter.next().unwrap();
+                let second = child_iter.next().unwrap();
+                if first.calculate() < second.calculate() {
+                    1
+                } else {
+                    0
+                }
+            }
+            Operator::EqualTo => {
+                let mut child_iter = self.children.iter();
+                let first = child_iter.next().unwrap();
+                let second = child_iter.next().unwrap();
+                if first.calculate() == second.calculate() {
+                    1
+                } else {
+                    0
+                }
+            }
         }
     }
 
