@@ -1,7 +1,4 @@
-use crate::lib::graph::NodeIndex;
-use crate::lib::graph2::Graph;
 use crate::puzzle15::parsing::{build_shortest_path, parse_graph_and_weights, parse_weight_map};
-use crate::puzzle15::ShortestPath;
 
 pub fn part1(content: &str) -> usize {
     let weight_map = parse_weight_map(content);

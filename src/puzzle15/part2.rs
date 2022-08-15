@@ -1,7 +1,4 @@
-use crate::lib::graph::NodeIndex;
-use crate::lib::graph2::Graph;
 use crate::puzzle15::parsing::{build_shortest_path, parse_graph_and_weights, parse_weight_map};
-use crate::puzzle15::ShortestPath;
 
 fn value_of(value: usize) -> usize {
     ((value - 1) % 9) + 1
